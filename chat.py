@@ -30,16 +30,7 @@ if __name__ == '__main__':
         else:
             message = short_message.lower()
 
-
-        # if chat_config['model'] == 'deepseek-chat':
         messages.append({'role': 'user', 'content': message})
-
-        # elif chat_config['model'] == 'deepseek-reasoner':
-            # if len(messages) == 0:
-            # messages.append({'role': 'user', 'content': message})
-            # else:
-            #     messages.append({'role': 'assistant', 'content': pre_answer})
-            #     messages.append({'role': 'user', 'content': message})
 
         print(f'\n{Colors.BOLD}{Colors.CYAN}AI: {Colors.RESET}')
         answer, _ = get_response(messages, client, chat_config)

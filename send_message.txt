@@ -1,1 +1,1 @@
-为什么python里用json保存的文件,中文都是这些字符\u6211\u60f3\u548c\u4e09\u89d2\u521d\u534e\u7ed3\u5a5a
+AAAAAAAAAAAAAAA
