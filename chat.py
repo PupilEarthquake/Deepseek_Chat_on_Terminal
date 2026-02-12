@@ -1,112 +1,156 @@
 import asyncio
-import sys
 from openai import AsyncOpenAI
 import httpx
 import utils
-import editor
+from textual.app import App
+from textual.containers import VerticalScroll, Horizontal
+from textual.widgets import TextArea, Static
+from textual.binding import Binding
+from rich.markdown import Markdown
+from textual import events
 
 
 
+class Bubble(Static):
+    '''
+    自定义聊天气泡部件
+    '''
+    def __init__(self, sender, content):
+        super().__init__(content)
+        self.sender = sender
 
-
-async def spinning_cursor():
-    while True:
-        for cursor in '|/-\\':
-            sys.stdout.write(f'\r{cursor} ')
-            sys.stdout.flush()
-            await asyncio.sleep(0.5)
-
-
-async def get_response(client, msg_list: list, model: str, tempreture: float, stream: bool):
-
-    spin_task = asyncio.create_task(spinning_cursor())
-    ai_task = client.chat.completions.create(
-                    model=model,
-                    messages=msg_list,
-                    stream=stream,
-                    temperature=tempreture
-                    )
-
-    response = await ai_task
-    spin_task.cancel()
-    sys.stdout.write('\r' + ' ' * 50 + '\r') # 清除该行
-    response_message = response.choices[0].message.content
-
-    if model == 'deepseek-reasoner':
-        response_reasoning_msg = response.choices[0].message.reasoning_content
-    else:
-        response_reasoning_msg = None
-
-    return response_reasoning_msg, response_message
+    def _on_mount(self):
+        if self.sender == "usr":
+            self.add_class("usr-message")
+        else:
+            self.add_class("ai-message")
+        self.border_title = self.sender
 
 
 
+class ChatInput(TextArea):
+    '''
+    自定义输入窗口, 将Tab键行为替换为缩进2字符
+    '''
+    def _on_key(self, event: events.Key):
+        if event.key == 'tab':
+            event.stop()
+            event.prevent_default()
+            self.insert('  ')
 
 
-def create_chat(filename: str, sys_announce, mode_text_head, show_thinking_com, model: str, toolbar_additional_content: str):
-    config = utils.loadconf()
-    apikey = config['network']['apikey']
-    proxy_url = config['network']['proxy']
-    tempreture = config.getfloat('model', 'tempreture')
-    stream = config.getboolean('model', 'stream')
-    show_thinking_conf = config.getboolean('output', 'thinking')
 
+class ChatApp(App):
+    CSS_PATH = 'chat.tcss'
+    BINDINGS = [
+        Binding('ctrl+c', 'quit', 'Exit', show=True),
+        Binding('ctrl+s', 'send_message', 'Send', show=True)
+    ]
 
-    if proxy_url in ['None', 'False']:
-        client = AsyncOpenAI(
-        api_key=apikey, 
-        base_url="https://api.deepseek.com"
+    def __init__(self, model, filename, sys_anno, msghead):
+        super().__init__()
+        self.model = model
+        self.filename = filename
+        # 给AI的系统提示
+        self.sys_anno = sys_anno  
+        self.msg_head = msghead
+
+        # 加载配置文件
+        config = utils.loadconf()
+        apikey = config['network']['apikey']
+        proxy_url = config['network']['proxy']
+
+        if proxy_url in ['None', 'False']:
+            self.client = AsyncOpenAI(
+            api_key=apikey, 
+            base_url="https://api.deepseek.com"
+            )
+        else:
+            self.client = AsyncOpenAI(
+            api_key=apikey, 
+            base_url="https://api.deepseek.com",
+            http_client=httpx.AsyncClient(proxy=proxy_url)
         )
-    else:
-        client = AsyncOpenAI(
-        api_key=apikey, 
-        base_url="https://api.deepseek.com",
-        http_client=httpx.AsyncClient(proxy=proxy_url)
-        )
+
+        # 生成保存路径
+        self.js_path, self.md_path = utils.create_save_path(filename)
+
+        # 创建消息列表
+        self.message_list = []
 
 
-    js_path, md_path = utils.create_save_path(filename)
-
-    session = editor.create_session(headtext="usr > ", toolbar_content=f"{toolbar_additional_content}")
-
-    msg_list_inner, msg_list_export = [], []
-
-    while True:
-        try:
-            sent_msg = session.prompt()
-            msg_list_inner.append({"role": "system", "content": sys_announce})
-            msg_list_inner.append({"role": "user", "content": f"{mode_text_head}:\n{sent_msg}"})
-            msg_list_export.append({"role": "user", "content": f"{mode_text_head}:\n\n{sent_msg}"})
-            utils.draw_line()
-
-            try:
-                response_think, response_answ = asyncio.run(get_response(client, msg_list_inner, model, tempreture, stream))
-                if response_think:
-                    if show_thinking_conf or show_thinking_com:
-                        editor.print_text('ds (thinking) > ', response_think, color='mb')
-                        utils.draw_line()
+    def compose(self):
+        yield VerticalScroll(id='chat-view')
+        yield ChatInput(id='input', placeholder='Ctrl+S Send')
         
-                editor.print_text('ds (answer) > ', response_answ)
-                utils.draw_line()
 
-                msg_list_inner.append({"role": "assistant", "content": response_answ})
-                msg_list_export.append({"role": "assistant", "content": response_answ})
-
-                utils.save_chat_json(js_path, msg_list_inner)
-                utils.save_chat_md(md_path, msg_list_export)
-
-                # print(msg_list_inner)
-
-            except Exception as e:
-                del msg_list_inner[-1]
-                editor.print_error(e)
-                utils.draw_line()
-
-        except KeyboardInterrupt:
-            break
-
-        except EOFError:
-            break
+    def on_mount(self):
+        self.query_one(ChatInput).focus()
 
 
-  
+    async def get_response(self, chatwindow):
+        # loading_spinner = LoadingIndicator()
+        ai_msg = Bubble('ai', 'Thinking')
+        # ai_row = Horizontal(
+        #         ai_msg,
+        #         Static(classes='space-ai'),
+        #         classes='message-row'
+        #     )
+        chatwindow.mount(ai_msg)
+
+        ai_msg.scroll_visible()
+        resobj = await self.client.chat.completions.create(
+                    model=self.model,
+                    messages=self.message_list,
+                    stream=False,
+                    temperature=1.0
+                    )
+        
+        response = resobj.choices[0].message.content
+
+        # 模拟回复
+        # response = '# SIMUL RES\n`async def simul_response(self, chatwindow):`'
+        # await asyncio.sleep(3)
+        ai_msg.update(Markdown(response))
+
+
+        self.message_list.append({"role": "assistant", "content": response})
+        utils.save_chat_json(self.js_path, self.message_list)
+        utils.save_chat_md(self.md_path, self.message_list)
+        chatwindow.scroll_end(animate=False)
+
+
+    def action_send_message(self):
+        input_widget = self.query_one('#input', ChatInput)
+        message_usr = input_widget.text.strip()
+
+        if message_usr:
+            message = Markdown(message_usr)
+
+
+            self.message_list.append({"role": "system", "content": self.sys_anno})
+            self.message_list.append({"role": "user", "content": f"{self.msg_head}\n\n{message_usr}"})
+
+
+            usr_smg = Bubble('usr', message_usr)
+            chatwindow = self.query_one("#chat-view", VerticalScroll)
+
+
+            # usr_row = Horizontal(
+            #     Static(classes='space-usr'),
+            #     usr_smg,
+            #     classes='message-row'
+            # )
+            chatwindow.mount(usr_smg)
+
+            input_widget.text = ''
+            usr_smg.scroll_visible()
+
+            self.run_worker(self.get_response(chatwindow))
+
+
+
+if __name__ == '__main__':
+    app = ChatApp('resoning', 'test', 'sys_anno', 'head')
+    app.run()
+    
