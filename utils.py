@@ -48,7 +48,7 @@ def save_chat_md(path, data):
             role_i = data[i]['role']
             content_i = data[i]['content']
             if role_i in ['user', 'assistant']:
-                md_file.write(f'__{role_i}:__\n {content_i} \n\n')
+                md_file.write(f'__{role_i}:__\n\n {content_i} \n\n')
 
 
 

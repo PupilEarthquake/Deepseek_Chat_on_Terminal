@@ -4,8 +4,14 @@ Screen {
 
 
 /*聊天区域设置*/
+
 #chat-view {
+    /*聊天背景颜色*/
     background: #1E1E1E;
+}
+
+.hidden {
+    display: none;
 }
 
 
@@ -16,39 +22,52 @@ Screen {
 }
 
 
-.space-ai {
-    width: auto;
-    min-width: 10%;
-    height: auto;
-}
 
-.space-usr {
-    width: auto;
-    min-width: 10%;
-    height: auto;
-}
-
-.usr-message {
-    border: round #00AFFF;
+#render_view {
+    /*.md文件渲染窗口样式*/
     background: #1E1E1E;
-    border-title-align: right;
-    width: auto;
-    max-width: 90%;
-    min-width: 16;
-    min-height: 1;
+    border-title-align: left;
+    width: 100%;
+    height: auto;
     padding: 0;
     margin: 0;
 }
 
-.ai-message {
-    border: round white;
+
+#raw_view {
+    /*.md文件编辑窗口样式*/
+    background: #15222D;
+    border: #15222D;
+    border-title-align: left;
+    width: 100%;
+    height: auto;
+    padding: 0;
+    margin: 0;
+}
+
+
+.usr-message {
+    /*用户气泡样式*/
+    border: #01A9F6 round;
     background: #1E1E1E;
     border-title-align: left;
-    width: auto;
-    max-width: 90%;
+    width: 90%;
     min-width: 16;
+    height: auto;
     min-height: 1;
-    padding: 0;
+    padding: 0 1 0 1;
+    margin: 0;
+}
+
+.ai-message {
+    /*ai气泡样式*/
+    border: white round;
+    background: #1E1E1E;
+    border-title-align: left;
+    width: 90%;
+    height: auto;
+    min-height: 1;
+    padding: 0 1 0 1;
     margin: 0;
 }
 
@@ -59,7 +78,7 @@ LoadingIndicator {
 }
 
 
-/*输入区域设置*/
+/*底部输入区设置*/
 
 #input:focus {
     border: round #00AFFF;

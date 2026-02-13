@@ -1,4 +1,4 @@
-#!/home/xiao/anaconda3/envs/AI/bin/python
+#!/path/to/your/python
 
 import argparse
 from chat import ChatApp
@@ -34,7 +34,7 @@ model_options = ["deepseek-chat", "deepseek-reasoner"]
 
 text_head_ls = {
     "ec": "你是一个翻译器, 将下面内容翻译成中文",
-    "ce": "你是一个翻译器, 将下面内容翻译成英文"}
+    "ce": "你是一个翻译器, 将下面内容翻译成英文",}
 
 text_head_options_ls = {
     "ec-ss": "分析句子的结构", 
@@ -92,6 +92,7 @@ elif args.cmd == "chat":
     filename = f"{utils.time_now()}_{str.upper(args.cmd)}"
     App = ChatApp(model, filename, sys_announce, text_head)
     App.run()
+
 
 
 
