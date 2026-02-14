@@ -3,6 +3,19 @@ Screen {
 }
 
 
+/*提醒样式*/
+Toast {
+    background: orange;
+    color: #1E1E1E;
+    border:  none;
+    text-style: none;
+    width: auto;
+    height: auto;
+    margin: 1 0 0 0;
+    padding: 0 1 0 1;
+}
+
+
 /*聊天区域设置*/
 
 #chat-view {
@@ -41,9 +54,19 @@ Screen {
     border-title-align: left;
     width: 100%;
     height: auto;
+    max-height: 16;
     padding: 0;
     margin: 0;
+    /* 滚动条 */
+    scrollbar-size: 1 1;
+    scrollbar-color: #9b9b9b;
+    scrollbar-background: #15222D;
+    scrollbar-color-hover: #d0d0d0;
+    scrollbar-background-hover: #15222D;
+    scrollbar-color-active: white;
+    scrollbar-background-active: #15222D;
 }
+
 
 
 .usr-message {
@@ -89,4 +112,12 @@ LoadingIndicator {
     border: round white;
     background: #1E1E1E;
     height: 6;
+    /* 滚动条 */
+    scrollbar-size: 1 1;
+    scrollbar-color: #9b9b9b;
+    scrollbar-background: #1E1E1E;
+    scrollbar-color-hover: #d0d0d0;
+    scrollbar-background-hover: #1E1E1E;
+    scrollbar-color-active: white;
+    scrollbar-background-active: #1E1E1E;
 }

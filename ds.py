@@ -58,9 +58,9 @@ if args.cmd == "ec":
         text_head = text_head + f", {text_head_options_ls["ec-ss"]}"
 
     sys_announce = "你是一个AI学术助手"
-
+    tempreture = 1.3
     filename = f"{utils.time_now()}_{str.upper(args.cmd)}"
-    App = ChatApp(model, filename, sys_announce, text_head)
+    App = ChatApp(model, filename, sys_announce, text_head, tempreture)
     App.run()
 
 
@@ -75,9 +75,9 @@ if args.cmd == "ce":
         text_head = text_head + f", {text_head_options_ls["ce-mt"]}"
 
     sys_announce = "你是一个AI学术助手"
-
+    tempreture = 1.3
     filename = f"{utils.time_now()}_{str.upper(args.cmd)}"
-    App = ChatApp(model, filename, sys_announce, text_head)
+    App = ChatApp(model, filename, sys_announce, text_head, tempreture)
     App.run()
 
 
@@ -89,8 +89,9 @@ elif args.cmd == "chat":
     
     text_head = ""
     sys_announce = "你是一个AI学术助手"
+    tempreture = 0.0
     filename = f"{utils.time_now()}_{str.upper(args.cmd)}"
-    App = ChatApp(model, filename, sys_announce, text_head)
+    App = ChatApp(model, filename, sys_announce, text_head, tempreture)
     App.run()
 
 
