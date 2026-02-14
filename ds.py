@@ -7,7 +7,7 @@ import utils
 
 
 parser = argparse.ArgumentParser(prog="ds")
-parser.add_argument("--version", "-v", action="version", version="DS Assistant CLI 3.0 Beta")
+parser.add_argument("--version", "-v", action="version", version="DS Assistant CLI v3.0")
 subparsers = parser.add_subparsers(dest="cmd")
 
 
