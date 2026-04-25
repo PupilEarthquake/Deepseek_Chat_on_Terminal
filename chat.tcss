@@ -71,7 +71,7 @@ Toast {
 
 .usr-message {
     /*用户气泡样式*/
-    border: #01A9F6 round;
+    /* border: #01A9F6 round; */
     background: #1E1E1E;
     border-title-align: left;
     width: 90%;
@@ -84,7 +84,7 @@ Toast {
 
 .ai-message {
     /*ai气泡样式*/
-    border: white round;
+    /* border: white round; */
     background: #1E1E1E;
     border-title-align: left;
     width: 90%;
@@ -104,7 +104,7 @@ LoadingIndicator {
 /*底部输入区设置*/
 
 #input:focus {
-    border: round #00AFFF;
+    border: white;
 }
 
 #input {

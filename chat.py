@@ -100,15 +100,17 @@ class ChatApp(App):
         Binding("ctrl+c", "show_quit_warning", "Quit Warning", show=False),
     ]
 
-    def __init__(self, model, filename, sys_anno, msghead, tempreture):
+    def __init__(self, model, filename, sys_anno, msghead, reason_eff, extra_body, tempreture):
         super().__init__()
         self.model = model
         self.filename = filename
         # 给AI的系统提示
         self.sys_anno = sys_anno  
         self.msg_head = msghead
+        # 其他参数
         self.tempreture = tempreture
-
+        self.reason_eff = reason_eff
+        self.extra_body = extra_body
         # 加载配置文件
         config = utils.loadconf()
         apikey = config['network']['apikey']
@@ -162,7 +164,9 @@ class ChatApp(App):
                         model=self.model,
                         messages=self.message_list,
                         stream=True,
-                        temperature=self.tempreture
+                        temperature=self.tempreture,
+                        reasoning_effort = "high",
+                        extra_body = self.extra_body
                         )
 
             async for chunk in stream:
